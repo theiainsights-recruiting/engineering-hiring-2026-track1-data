@@ -65,8 +65,8 @@ def run(
     input_path: str, output_root: str, run_date: str, batch_size: int = 200
 ) -> None:
     df = pd.read_parquet(input_path)
-    skip = already_enriched(output_root)
-    todo = df[~df["company_id"].isin(skip)]
+    remaining = set(df["company_id"]) - already_enriched(output_root)
+    todo = df.set_index("company_id").loc[list(remaining)].reset_index()
     logger.info("enriching %d of %d documents", len(todo), len(df))
 
     session = requests.Session()
